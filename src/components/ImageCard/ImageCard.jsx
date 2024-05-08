@@ -1,14 +1,26 @@
 import css from "./ImageCard.module.css";
 
-export default function ImageCard({ urls, description, onOpen }) {
+const ImageCard = ({
+  image: { urls, description, user },
+  onImgClick,
+}) => {
+  const imgInfo = {
+    srcImgModal: urls.regular,
+    description: description,
+    likes: likes,
+    author: user.name,
+  };
+
   return (
-    <div className={css.card}>
+    <div className={css.imageCard}>
       <img
-        className={css.image}
-        onClick={() => onOpen(urls.regular)}
+        onClick={() => onImgClick(imgInfo)}
+        width="400"
         src={urls.small}
         alt={description}
       />
     </div>
   );
-}
+};
+
+export default ImageCard;
