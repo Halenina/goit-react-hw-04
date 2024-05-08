@@ -3,7 +3,7 @@ import axios from "axios";
 axios.defaults.baseURL = "https://api.unsplash.com/search";
 const API_KEY = "vPa9Bbyb3U7atrDFhyY-HBPq6oGSZoF_lxeDclq6RSk";
 
-export const fetchImages = async (
+export const fetchImagesByQuery = async (
   currentPage,
   per_page,
   searchQuery
