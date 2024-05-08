@@ -3,7 +3,7 @@ import "./App.css";
 import SearchBar from "./components/SearchBar/SearchBar";
 import ImageGallery from "./components/ImageGallery/ImageGallery";
 import ErrorMessage from "./components/ErrorMessage/ErrorMessage";
-import { Loader } from "./components/Loader/Loader";
+import Loader from "../Loader/Loader";
 import { fetchImagesByQuery } from "./api";
 import LoadMoreBtn from "./components/LoadMoreBtn/LoadMoreBtn";
 import ImageModal from "./components/ImageModal/ImageModal";
