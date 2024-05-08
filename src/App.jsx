@@ -4,103 +4,116 @@ import SearchBar from "./components/SearchBar/SearchBar";
 import ImageGallery from "./components/ImageGallery/ImageGallery";
 import ErrorMessage from "./components/ErrorMessage/ErrorMessage";
 import Loader from "./components/Loader/Loader";
-import { fetchImagesByQuery } from "./api";
-import LoadMoreBtn from "./components/LoadMoreBtn/LoadMoreBtn";
+import { fetchImages } from "./api";
 import ImageModal from "./components/ImageModal/ImageModal";
+import LoadMoreBtn from "./components/LoadMoreBtn/LoadMoreBtn";
+import toast, { Toaster } from "react-hot-toast";
 
-function App() {
+export default function App() {
   const [images, setImages] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
-  const [isError, setIsError] = useState(false);
-  const [errorMessage, setErrorMessage] = useState("");
-  const [searchQuery, setSearchQuery] = useState("");
-  const [loadMoreBtn, setLoadMoreBtn] = useState(false);
-  const [currentPage, setCurrentPage] = useState(1);
-  const [imgInfo, setImgInfo] = useState({});
-  const [imgModalIsOpen, setImgModalIsOpen] = useState(false);
-  const per_page = 12;
+  const [error, setError] = useState(false);
 
-  const handleSearch = (query) => {
-    if (query !== "" && query !== searchQuery) {
-      setSearchQuery(query);
-      setImages([]);
-    }
+  const [query, setQuery] = useState("");
+  const [page, setPage] = useState(1);
+
+  const [modalIsOpen, setIsOpen] = useState(false);
+  const [selectedImage, setSelectedImage] = useState(null);
+  const [showButton, setShowButton] = useState(false);
+
+  const buttonRef = useRef(null);
+
+  const handleSearch = (newQuery) => {
+    setQuery(newQuery);
+    setPage(1);
+    setImages([]);
   };
 
   useEffect(() => {
-    const fetchImages = async () => {
+    if (query === "") {
+      return;
+    }
+
+    async function getImages() {
       try {
-        setIsError(false);
+        setError(false);
         setIsLoading(true);
-        setLoadMoreBtn(false);
-        const response = await fetchImagesByQuery(
-          currentPage,
-          per_page,
-          searchQuery
-        );
-
-        if (response.total === 0) {
-          setImages([]);
-          setIsError(true);
-          setErrorMessage(
-            "Sorry, nothing was found for your request! Please try something else!"
-          );
+        const data = await fetchImages(query, page);
+        if (data.length === 0) {
+          toast.error("No images!");
         } else {
-          setImages((prevImages) => [...prevImages, ...response.results]);
-
-          {
-            currentPage < response.total_pages
-              ? setLoadMoreBtn(true)
-              : setLoadMoreBtn(false);
-          }
+          setImages((prevArticles) => {
+            return [...prevArticles, ...data];
+          });
         }
-      } catch (err) {
-        setIsError(true);
+      } catch (error) {
+        setError(true);
       } finally {
         setIsLoading(false);
       }
-    };
-
-    if (searchQuery !== "") fetchImages();
-  }, [searchQuery, currentPage]);
+    }
+    getImages();
+  }, [page, query]);
 
   const handleLoadMore = () => {
-    setCurrentPage((prevPage) => prevPage + 1);
+    setPage(page + 1);
   };
 
-  const handleOnImgClick = (image) => {
-    setImgInfo(image);
-    openImgModal();
+  const openModal = (image) => {
+    setSelectedImage(image);
+    setIsOpen(true);
   };
 
-  const openImgModal = () => {
-    setImgModalIsOpen(true);
+  const closeModal = () => {
+    setIsOpen(false);
   };
 
-  const closeImgModal = () => {
-    setImgModalIsOpen(false);
+  useEffect(() => {
+    if (images.length <= 12) {
+      return;
+    }
+    if (buttonRef.current) {
+      const loadMoreScroll = buttonRef.current.getBoundingClientRect();
+      window.scrollTo({
+        top: window.scrollY + loadMoreScroll.top,
+        behavior: "smooth",
+      });
+    }
+  }, [images]);
+
+  const scrollToTop = () => {
+    window.scrollTo({
+      top: 0,
+      behavior: "smooth",
+    });
   };
+
+  const handleScroll = () => {
+    const scrolled = window.scrollY;
+    setShowButton(scrolled > 0);
+  };
+
+  useEffect(() => {
+    window.onscroll = handleScroll;
+    return () => (window.onscroll = null);
+  }, []);
 
   return (
-    <div>
-      <SearchBar onSearch={handleSearch} />
-      {isError && <ErrorMessage message={errorMessage} />}
-      {images.length > 0 && (
-        <ImageGallery images={images} onImgClick={handleOnImgClick} />
-      )}
+    <div className={css.container}>
+      <SearchBar onSubmit={handleSearch} />
+      {error && <ErrorMassage />}
+      {images.length > 0 && <ImageGallery onOpen={openModal} images={images} />}
       {isLoading && <Loader />}
-      {searchQuery !== "" && loadMoreBtn && (
-        <LoadMoreBtn onLoadMore={handleLoadMore} />
+      {images.length > 0 && !isLoading && (
+        <LoadMorebutton loadMore={handleLoadMore} onRef={buttonRef} />
       )}
-      {
-        <ImageModal
-          onImgModalOpen={imgModalIsOpen}
-          onImgModalClose={closeImgModal}
-          {...imgInfo}
-        />
-      }
+      <ImageModal
+        openModal={modalIsOpen}
+        onClose={closeModal}
+        selectedImage={selectedImage}
+      />
+      <Toaster position="top-right" reverseOrder={false} />
+      {showButton && <ScrollButton scrollToTop={scrollToTop} />}
     </div>
   );
 }
-
-export default App;

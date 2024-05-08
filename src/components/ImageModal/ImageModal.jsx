@@ -1,33 +1,44 @@
 import css from "./ImageModal.module.css";
-import ReactModal from "react-modal";
+import Modal from "react-modal";
 
-ReactModal.setAppElement("#root");
+Modal.setAppElement("#root");
 
-const ImageModal = ({
-  onImgModalOpen,
-  onImgModalClose,
-  srcImgModal,
-  description,
-  likes,
-  author,
-}) => {
-  return (
-    <ReactModal
-      className={css.Modal}
-      overlayClassName={css.Overlay}
-      isOpen={onImgModalOpen}
-      onRequestClose={onImgModalClose}
-    >
-      <img className={css.imgModal} src={srcImgModal} alt="" />
-      <div className={css.imgDescription}>
-        <p>{description}</p>
-        <div className={css.imgInfo}>
-          <p>Likes: {likes}</p>
-          <p>Author: {author}</p>
-        </div>
-      </div>
-    </ReactModal>
-  );
+const customStyles = {
+  overlay: {
+    backgroundColor: "rgba(0, 0, 0, 0.8)",
+  },
+  content: {
+    top: "50%",
+    left: "50%",
+    right: "auto",
+    bottom: "auto",
+    transform: "translate(-50%, -50%)",
+    background: "none",
+    backgroundSize: "cover",
+    overflow: "none",
+    border: "none",
+    maxWidth: "calc(100vw - 20px)",
+    maxHeight: "calc(100vh - 20px)",
+    padding: "0px",
+  },
 };
 
-export default ImageModal;
+export default function ImageModal({ openModal, selectedImage, onClose }) {
+  return (
+    <Modal
+      isOpen={openModal}
+      style={customStyles}
+      shouldCloseOnOverlayClick={true}
+      shouldCloseOnEsc={true}
+      onRequestClose={onClose}
+    >
+      {selectedImage && (
+        <img
+          className={css.image}
+          src={selectedImage}
+          alt={selectedImage.alt_description}
+        />
+      )}
+    </Modal>
+  );
+}
