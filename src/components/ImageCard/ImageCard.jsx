@@ -1,7 +1,7 @@
 import css from "./ImageCard.module.css";
 
 const ImageCard = ({
-  image: { urls, description, likes, user },
+  image: { urls, description, user },
   onImgClick,
 }) => {
   const imgInfo = {
