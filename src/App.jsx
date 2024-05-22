@@ -20,12 +20,13 @@ function App() {
   const [imgModalIsOpen, setImgModalIsOpen] = useState(false);
   const per_page = 12;
 
-  const handleSearch = (query) => {
+   const handleSearch = (query) => {
     if (query !== "" && query !== searchQuery) {
       setSearchQuery(query);
       setImages([]);
-    }
-  };
+      setCurrentPage(1)
+         }
+      };
 
   useEffect(() => {
     const fetchImages = async () => {
